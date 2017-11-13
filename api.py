@@ -314,7 +314,6 @@ def getThemes(idPersons):
         rows = cursor.fetchall()
         for row in rows:
             idPersons = int (idPersons)
-
             if (idPersons == row.people_id):
                 favorito = True
             else:
@@ -323,6 +322,22 @@ def getThemes(idPersons):
         return jsonify(lista)
     except pyodbc.Error as ex:
         return ex.args[1]
+
+@app.route('/setThemesPeople', methods=["POST"])
+def setThemesPeople():
+    try:
+        data = request.data
+        dataDict = json.loads(data)
+        themeid = dataDict["theme_id"]
+        peopleid = dataDict["people_id"]
+        cursor = cnxn.cursor()
+        cursor.execute('insert into theme_people(theme_id,people_id) values (?,?)', themeid,peopleid)
+        cnxn.commit
+        return jsonify({"succesful": True})
+    except pyodbc.Error as ex:
+        return ex.args[1]
+
+
 
 
 #tiene que ir al final
