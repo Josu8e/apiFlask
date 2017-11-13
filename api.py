@@ -338,6 +338,46 @@ def setThemesPeople():
         return ex.args[1]
 
 
+@app.route('/getPlaces/<idPerson>')
+def getPlaces(idPerson):
+    try:
+        cursor = cnxn.cursor()
+        cursor.execute('select * from places as p left join people_places as pp on p.id = pp.place_id')
+        lista = []
+        rows = cursor.fetchall()
+        for row in rows:
+            idPerson = int(idPerson)
+            favorito = False
+            if (idPerson == row.people_id):
+                favorito = True
+            else:
+                favorito = False
+            a = place(row.id, row.latitud, row.longitud, row.nombre, row.descripcion, row.services, favorito)
+            cursor2 = cnxn.cursor()
+            cursor2.execute('select * from places as p inner join photos as ph on ph.place_id = p.id where place_id = ?', row.id)
+            filas = cursor2.fetchall()
+            photos = []
+            for fila in filas:
+                photos.append(fila.foto)
+            a.add_photos(photos)
+            lista.append({"id":a.id,"latitud":a.latitud,"longitud":a.longitud,"nombre":a.nombre,"descripcion":a.descripcion,"services":a.services,"favorito":a.favorito,"fotos":a.photos})
+        return jsonify(lista)
+    except pyodbc.Error as ex:
+        return ex.args[1]
+
+
+class place:
+    def __init__(self,id,latitud,longitud,nombre,descripcion,services,favorito):
+        self.id = id
+        self.latitud = latitud
+        self.longitud = longitud
+        self.nombre = nombre
+        self.descripcion = descripcion
+        self.services = services
+        self.photos = []
+        self.favorito = favorito
+    def add_photos(self,photos):
+        self.photos = photos
 
 
 #tiene que ir al final
