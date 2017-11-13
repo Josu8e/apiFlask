@@ -305,6 +305,25 @@ def createTheme():
         return ex.args[1]
 
 
+@app.route('/getThemes/<idPersons>', methods=["GET"])
+def getThemes(idPersons):
+    try:
+        cursor =  cnxn.cursor()
+        cursor.execute('select * from themes as t left join theme_people as tp on t.id = tp.theme_id')
+        lista = []
+        rows = cursor.fetchall()
+        for row in rows:
+            idPersons = int (idPersons)
+
+            if (idPersons == row.people_id):
+                favorito = True
+            else:
+                favorito = False
+            lista.append({"id": row.id, "nombre": row.nombre, "descripcion": row.descripcion, "foto": row.foto,"favorito": favorito})
+        return jsonify(lista)
+    except pyodbc.Error as ex:
+        return ex.args[1]
+
 
 #tiene que ir al final
 if __name__  == '__main__':
